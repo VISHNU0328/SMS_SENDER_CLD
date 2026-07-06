@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # SMS Sender (SMPP Batch Application)
 
 ## Overview
@@ -290,3 +291,7 @@ pip install -r requirements.txt
 - Enable automatic restart using systemd.
 - Archive processed files regularly.
 - Test against the target SMSC before production rollout.
+=======
+# SMSC-worker
+Python Based Message Sender Application
+>>>>>>> 09eeec758c7f93b33516f7b013302cc30781dea5
