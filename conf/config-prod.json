@@ -5,151 +5,63 @@
         "environment": "PROD"
     },
 
+    "input": {
+        "delimiter": ",",
+        "has_header": true,
+        "encoding": "utf-8"
+    },
+
     "smpp": {
-
-        "host": "YOUR_PRODUCTION_SMPP_HOST",
-
+        "host": "YOUR_PROD_SMSC_HOST",
         "port": 2775,
-
-        "system_id": "YOUR_SYSTEM_ID",
-
-        "password": "YOUR_PASSWORD",
-
-        "system_type": "pelatro",
-
-        "bind_type": "TRX",
-
-        "interface_version": 34,
-
-        "source_addr": "mViva",
+        "system_id": "YOUR_PROD_SYSTEM_ID",
+        "password": "YOUR_PROD_PASSWORD",
+        "system_type": "",
+        "source_addr": "PELATRO",
 
         "addr_ton": 5,
-
         "addr_npi": 0,
 
         "dest_ton": 1,
-
         "dest_npi": 1,
 
         "data_coding": 0,
-
         "registered_delivery": 1,
 
-        "esm_class": 0,
-
-        "protocol_id": 0,
-
-        "priority_flag": 0,
-
-        "replace_if_present_flag": 0,
-
-        "service_type": "",
-
-        "validity_period": "",
-
-        "schedule_delivery_time": "",
-
         "connection_timeout": 30,
-
         "socket_timeout": 30,
 
         "enquire_link_interval": 30,
-
         "reconnect_interval": 10,
-
         "max_reconnect_attempts": 0
     },
 
-    "paths": {
-
-        "input_directory": "/opt/sms_sender/input",
-
-        "archive_directory": "/opt/sms_sender/archive",
-
-        "failed_directory": "/opt/sms_sender/failed",
-
-        "delivery_report_directory": "/opt/sms_sender/delivery_report",
-
-        "log_directory": "/opt/sms_sender/logs",
-
-        "log_file": "sms_sender.log",
-
-        "invalid_record_file": "/opt/sms_sender/failed/invalid_records.csv",
-
-        "message_mapping_file": "/opt/sms_sender/delivery_report/message_mapping.csv"
-    },
-
     "processing": {
-
-        "batch_size": 500,
-
-        "rate_limit_per_second": 100,
-
-        "max_retry": 5,
-
-        "retry_interval_seconds": 10,
+        "rate_limit_per_second": 50,
+        "max_retry": 3,
+        "retry_interval_seconds": 5,
 
         "archive_after_success": true,
-
         "delete_after_archive": false,
-
-        "move_to_failed_on_error": true,
-
-        "continue_on_validation_error": true,
-
-        "allow_duplicate_msisdn": true
-    },
-
-    "validation": {
-
-        "expected_header": [
-            "MSISDN",
-            "Message"
-        ],
-
-        "min_msisdn_length": 8,
-
-        "max_msisdn_length": 15,
-
-        "max_message_length": 1000,
-
-        "allow_unicode": true,
-
-        "allow_empty_message": false,
-
-        "allow_empty_msisdn": false
-    },
-
-    "logging": {
-
-        "level": "INFO",
-
-        "console": false,
-
-        "file": true,
-
-        "rotation": {
-
-            "enabled": true,
-
-            "max_file_size_mb": 100,
-
-            "backup_count": 30
-        }
+        "move_to_failed_on_error": true
     },
 
     "delivery_report": {
-
         "enabled": true,
-
-        "write_header": true,
-
-        "output_file_prefix": "DLR",
+        "wait_timeout_seconds": 300,
 
         "delimiter": ",",
+        "write_header": true,
+        "output_file_prefix": "DLR"
+    },
 
-        "flush_every_write": true,
-
-        "wait_timeout_seconds": 300
+    "paths": {
+        "input_directory": "./input",
+        "archive_directory": "./archive",
+        "failed_directory": "./failed",
+        "delivery_report_directory": "./delivery_reports",
+        "invalid_record_file": "./failed/invalid_records.csv",
+        "message_mapping_file": "./data/message_mapping.csv",
+        "log_directory": "./logs"
     }
 }

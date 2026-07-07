@@ -4,7 +4,7 @@
 Module      : models.py
 Description : Common Data Models
 Author      : Pelatro
-Version     : 1.0
+Version     : 1.1
 ===============================================================================
 """
 
@@ -19,10 +19,9 @@ from typing import Optional, List
 
 @dataclass
 class SMSRecord:
-    row_number: int
-    msisdn: str
-    message: str
-
+    row_number: int = 0
+    msisdn: str = ""
+    message: str = ""
     encoding: str = "GSM7"
     sms_parts: int = 1
 
@@ -66,21 +65,14 @@ class SMSRecord:
 
 @dataclass
 class DeliveryReport:
-
     message_id: str
-
     msisdn: str
-
     status: str
-
     submit_time: str
-
     done_time: str
 
     error_code: str = "000"
-
     description: str = ""
-
     raw_pdu: str = ""
 
 
@@ -90,13 +82,9 @@ class DeliveryReport:
 
 @dataclass
 class InvalidRecord:
-
     row_number: int
-
     msisdn: str
-
     message: str
-
     reason: str
 
 
@@ -106,17 +94,13 @@ class InvalidRecord:
 
 @dataclass
 class ValidationResult:
-
-    success: bool
+    success: bool = False
 
     valid_records: List[SMSRecord] = field(default_factory=list)
-
     invalid_records: List[InvalidRecord] = field(default_factory=list)
 
     total_records: int = 0
-
     valid_count: int = 0
-
     invalid_count: int = 0
 
 
@@ -126,21 +110,14 @@ class ValidationResult:
 
 @dataclass
 class ApplicationStatistics:
-
     total_records: int = 0
-
     submitted_records: int = 0
-
     delivered_records: int = 0
-
     failed_records: int = 0
-
     invalid_records: int = 0
-
     total_sms_parts: int = 0
 
     start_time: Optional[str] = None
-
     end_time: Optional[str] = None
 
     execution_time: float = 0.0
@@ -152,17 +129,11 @@ class ApplicationStatistics:
 
 @dataclass
 class MessageCorrelation:
-
     message_id: str
-
     msisdn: str
-
     source_addr: str
-
     encoding: str
-
     sms_parts: int
-
     submit_time: str
 
 
@@ -172,13 +143,9 @@ class MessageCorrelation:
 
 @dataclass
 class SubmitResult:
-
     success: bool
-
     message_id: str = ""
-
     error_message: str = ""
-
     command_status: int = 0
 
 
@@ -188,13 +155,9 @@ class SubmitResult:
 
 @dataclass
 class ConnectionStatus:
-
     connected: bool = False
-
     bound: bool = False
-
     reconnect_count: int = 0
-
     last_connected_time: str = ""
 
 
@@ -204,19 +167,11 @@ class ConnectionStatus:
 
 @dataclass
 class HealthStatus:
-
     application: str
-
     environment: str
-
     connected: bool
-
     bound: bool
-
     sender_alive: bool
-
     receiver_alive: bool
-
     enquire_alive: bool
-
     timestamp: str

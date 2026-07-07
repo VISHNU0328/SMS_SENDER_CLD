@@ -2,499 +2,364 @@
 """
 ===============================================================================
 Module      : validator.py
-Description : CSV Validation Module
-Version     : 1.0
+Description : Input CSV Validator
+Version     : 1.2
 ===============================================================================
 """
 
 import csv
-from typing import List
+import math
+import re
+from pathlib import Path
 
 from models import (
     SMSRecord,
-    InvalidRecord,
-    ValidationResult
+    ValidationResult,
+    InvalidRecord
 )
 
 
 class Validator:
     """
-    Validates input CSV files before submission.
+    Validates the input CSV file and converts valid rows
+    into SMSRecord objects.
     """
 
-    GSM7_BASIC = (
-        "@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ"
-        "ÆæßÉ !\"#¤%&'()*+,-./"
-        "0123456789:;<=>?"
-        "¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ`"
-        "¿abcdefghijklmnopqrstuvwxyzäöñüà"
-    )
-
-    GSM7_EXTENDED = "^{}\\[~]|€"
+    GSM7_REGEX = re.compile(r'^[\x00-\x7F]*$')
 
     def __init__(self, config, logger):
 
         self.config = config
         self.logger = logger
 
-        validation = config["validation"]
+        input_cfg = config.get("input", {})
+        paths = config["paths"]
 
-        self.expected_header = validation["expected_header"]
+        self.delimiter = input_cfg.get(
+            "delimiter",
+            ","
+        )
 
-        self.min_msisdn_length = validation["min_msisdn_length"]
+        self.encoding = input_cfg.get(
+            "encoding",
+            "utf-8"
+        )
 
-        self.max_msisdn_length = validation["max_msisdn_length"]
+        self.has_header = input_cfg.get(
+            "has_header",
+            True
+        )
 
-        self.max_message_length = validation["max_message_length"]
+        self.invalid_record_file = paths[
+            "invalid_record_file"
+        ]
+
+        self.min_msisdn_length = config["processing"].get(
+            "min_msisdn_length",
+            8
+        )
+
+        self.max_msisdn_length = config["processing"].get(
+            "max_msisdn_length",
+            15
+        )
 
     # =====================================================================
-    # Public API
+    # Process File
     # =====================================================================
 
-    def validate(self, input_file: str) -> ValidationResult:
-
-        result = ValidationResult(success=False)
-
-        try:
-
-            with open(
-                input_file,
-                newline="",
-                encoding="utf-8"
-            ) as fp:
-
-                reader = csv.reader(fp)
-
-                try:
-                    header = next(reader)
-                except StopIteration:
-                    raise ValueError("Input CSV is empty.")
-
-                self._validate_header(header)
-
-                for row_number, row in enumerate(reader, start=2):
-
-                    result.total_records += 1
-
-                    if len(row) != 2:
-
-                        result.invalid_records.append(
-                            InvalidRecord(
-                                row_number=row_number,
-                                msisdn="",
-                                message="",
-                                reason="Invalid column count"
-                            )
-                        )
-
-                        continue
-
-                    msisdn = row[0].strip()
-
-                    message = row[1].strip()
-
-                    valid, reason = self._validate_msisdn(msisdn)
-
-                    if not valid:
-
-                        result.invalid_records.append(
-                            InvalidRecord(
-                                row_number=row_number,
-                                msisdn=msisdn,
-                                message=message,
-                                reason=reason
-                            )
-                        )
-
-                        continue
-
-                    valid, reason = self._validate_message(message)
-
-                    if not valid:
-
-                        result.invalid_records.append(
-                            InvalidRecord(
-                                row_number=row_number,
-                                msisdn=msisdn,
-                                message=message,
-                                reason=reason
-                            )
-                        )
-
-                        continue
-
-                    encoding = self.detect_encoding(message)
-
-                    sms_parts = self.calculate_sms_parts(
-                        message,
-                        encoding
-                    )
-
-                    result.valid_records.append(
-                        SMSRecord(
-                            row_number=row_number,
-                            msisdn=msisdn,
-                            message=message,
-                            encoding=encoding,
-                            sms_parts=sms_parts
-                        )
-                    )
-
-        except Exception as ex:
-
-            self.logger.exception(
-                "Validation failed: %s",
-                ex
-            )
-
-            raise
-
-        result.valid_count = len(result.valid_records)
-
-        result.invalid_count = len(result.invalid_records)
-
-        result.success = result.valid_count > 0
+    def process(self, input_file):
 
         self.logger.info(
-            "Validation completed. Total=%d Valid=%d Invalid=%d",
-            result.total_records,
+            "Processing input file: %s",
+            input_file
+        )
+
+        self.logger.info(
+            "Delimiter : '%s'",
+            self.delimiter
+        )
+
+        result = ValidationResult()
+
+        invalid_rows = []
+
+        with open(
+            input_file,
+            "r",
+            encoding=self.encoding,
+            newline=""
+        ) as fp:
+
+            reader = csv.DictReader(
+                fp,
+                delimiter=self.delimiter
+            )
+
+            expected = [
+                "MSISDN",
+                "Message"
+            ]
+
+            if self.has_header:
+
+                if reader.fieldnames != expected:
+
+                    raise ValueError(
+                        "Invalid header. Expected: "
+                        + self.delimiter.join(expected)
+                    )
+
+            for line_number, row in enumerate(
+                reader,
+                start=2
+            ):
+
+                record, error = self._validate_row(row)
+
+                if error:
+
+                    invalid = InvalidRecord(
+                        row_number=line_number,
+                        msisdn=row.get("MSISDN", ""),
+                        message=row.get("Message", ""),
+                        reason=error
+                    )
+
+                    result.invalid_records.append(
+                        invalid
+                    )
+
+                    result.invalid_count += 1
+
+                    invalid_rows.append([
+                        line_number,
+                        row.get("MSISDN", ""),
+                        row.get("Message", ""),
+                        error
+                    ])
+
+                else:
+
+                    record.row_number = line_number
+
+                    result.valid_records.append(
+                        record
+                    )
+
+                    result.valid_count += 1
+
+        result.total_records = (
+            result.valid_count +
+            result.invalid_count
+        )
+
+        result.success = (
+            result.valid_count > 0
+        )
+
+        if invalid_rows:
+
+            self._write_invalid_records(
+                invalid_rows
+            )
+
+        self.logger.info(
+            "Validation complete. Valid=%d Invalid=%d",
             result.valid_count,
             result.invalid_count
         )
 
         return result
-
-    # =====================================================================
-    # Header Validation
-    # =====================================================================
-
-    def _validate_header(self, header):
-
-        if header != self.expected_header:
-
-            raise ValueError(
-                f"Invalid CSV header. Expected: {self.expected_header}"
-            )
-
-    # =====================================================================
-    # MSISDN Validation
+        # =====================================================================
+    # Validate One Row
     # =====================================================================
 
-    def _validate_msisdn(self, msisdn):
+    def _validate_row(self, row):
+
+        msisdn = str(
+            row.get("MSISDN", "")
+        ).strip()
+
+        message = str(
+            row.get("Message", "")
+        ).strip()
+
+        # ---------------------------------------------------------------
+        # MSISDN Validation
+        # ---------------------------------------------------------------
 
         if not msisdn:
-
-            return False, "MSISDN is empty"
+            return None, "MSISDN is empty"
 
         if not msisdn.isdigit():
-
-            return False, "MSISDN must contain only digits"
+            return None, "MSISDN must contain only digits"
 
         if len(msisdn) < self.min_msisdn_length:
-
-            return False, "MSISDN too short"
-
-        if len(msisdn) > self.max_msisdn_length:
-
-            return False, "MSISDN too long"
-
-        return True, ""
-    
-        # =====================================================================
-    # Message Validation
-    # =====================================================================
-
-    def _validate_message(self, message):
-
-        if message is None:
-
-            return False, "Message is NULL"
-
-        message = str(message)
-
-        if len(message.strip()) == 0:
-
-            return False, "Message is empty"
-
-        if len(message) > self.max_message_length:
-
-            return False, (
-                f"Message exceeds maximum supported length "
-                f"({self.max_message_length})"
+            return None, (
+                f"MSISDN must be at least "
+                f"{self.min_msisdn_length} digits"
             )
 
-        return True, ""
+        if len(msisdn) > self.max_msisdn_length:
+            return None, (
+                f"MSISDN must not exceed "
+                f"{self.max_msisdn_length} digits"
+            )
 
-    # =====================================================================
-    # GSM 03.38 Detection
-    # =====================================================================
+        # ---------------------------------------------------------------
+        # Message Validation
+        # ---------------------------------------------------------------
 
-    def is_gsm7(self, message: str) -> bool:
+        if not message:
+            return None, "Message is empty"
 
-        for ch in message:
+        encoding = self._detect_encoding(
+            message
+        )
 
-            if ch in self.GSM7_BASIC:
-                continue
+        sms_parts = self._calculate_sms_parts(
+            message,
+            encoding
+        )
 
-            if ch in self.GSM7_EXTENDED:
-                continue
+        record = SMSRecord(
+            msisdn=msisdn,
+            message=message,
+            encoding=encoding,
+            sms_parts=sms_parts
+        )
 
-            return False
-
-        return True
+        return record, None
 
     # =====================================================================
     # Encoding Detection
     # =====================================================================
 
-    def detect_encoding(self, message: str) -> str:
+    def _detect_encoding(
+        self,
+        message: str
+    ) -> str:
 
-        if self.is_gsm7(message):
-
+        if self.GSM7_REGEX.fullmatch(message):
             return "GSM7"
 
         return "UCS2"
 
     # =====================================================================
-    # GSM Septet Length
+    # SMS Parts Calculation
     # =====================================================================
 
-    def gsm7_length(self, message: str) -> int:
-        """
-        Extended GSM characters occupy two septets.
-        """
-
-        length = 0
-
-        for ch in message:
-
-            if ch in self.GSM7_EXTENDED:
-
-                length += 2
-
-            else:
-
-                length += 1
-
-        return length
-
-    # =====================================================================
-    # SMS Part Calculation
-    # =====================================================================
-
-    def calculate_sms_parts(
+    def _calculate_sms_parts(
         self,
         message: str,
         encoding: str
     ) -> int:
 
-        if encoding == "GSM7":
-
-            length = self.gsm7_length(message)
-
-            #
-            # Single GSM SMS
-            #
-
-            if length <= 160:
-
-                return 1
-
-            #
-            # Concatenated GSM
-            #
-
-            return ((length - 1) // 153) + 1
-
-        #
-        # UCS2
-        #
-
         length = len(message)
 
-        if length <= 70:
+        if encoding == "GSM7":
 
+            if length <= 160:
+                return 1
+
+            return math.ceil(length / 153)
+
+        # UCS2
+
+        if length <= 70:
             return 1
 
-        #
-        # Concatenated UCS2
-        #
-
-        return ((length - 1) // 67) + 1
+        return math.ceil(length / 67)
 
     # =====================================================================
-    # Record Statistics
+    # Write Invalid Records
     # =====================================================================
 
-    def calculate_statistics(self, records: List[SMSRecord]):
-
-        statistics = {
-
-            "gsm7": 0,
-
-            "ucs2": 0,
-
-            "single_part": 0,
-
-            "multi_part": 0,
-
-            "total_sms_parts": 0
-
-        }
-
-        for record in records:
-
-            if record.encoding == "GSM7":
-
-                statistics["gsm7"] += 1
-
-            else:
-
-                statistics["ucs2"] += 1
-
-            if record.sms_parts == 1:
-
-                statistics["single_part"] += 1
-
-            else:
-
-                statistics["multi_part"] += 1
-
-            statistics["total_sms_parts"] += record.sms_parts
-
-        return statistics
-
-    # =====================================================================
-    # Logging
-    # =====================================================================
-
-    def log_statistics(self, statistics):
-
-        self.logger.info("=" * 70)
-        self.logger.info("Validation Statistics")
-        self.logger.info("=" * 70)
-        self.logger.info(
-            "GSM7 Messages      : %d",
-            statistics["gsm7"]
-        )
-        self.logger.info(
-            "Unicode Messages   : %d",
-            statistics["ucs2"]
-        )
-        self.logger.info(
-            "Single Part SMS    : %d",
-            statistics["single_part"]
-        )
-        self.logger.info(
-            "Multipart SMS      : %d",
-            statistics["multi_part"]
-        )
-        self.logger.info(
-            "Total SMS Parts    : %d",
-            statistics["total_sms_parts"]
-        )
-        self.logger.info("=" * 70)
-    
-        # =====================================================================
-    # Invalid Record Writer
-    # =====================================================================
-
-    def write_invalid_records(
+    def _write_invalid_records(
         self,
-        invalid_records: List[InvalidRecord]
+        rows
     ):
 
-        if not invalid_records:
+        output = Path(
+            self.invalid_record_file
+        )
 
-            self.logger.info("No invalid records found.")
-            return
+        output.parent.mkdir(
+            parents=True,
+            exist_ok=True
+        )
 
-        output_file = self.config["paths"]["invalid_record_file"]
+        with open(
+            output,
+            "w",
+            newline="",
+            encoding=self.encoding
+        ) as fp:
 
-        try:
-
-            with open(
-                output_file,
-                "w",
-                newline="",
-                encoding="utf-8"
-            ) as fp:
-
-                writer = csv.writer(fp)
-
-                writer.writerow([
-                    "ROW_NUMBER",
-                    "MSISDN",
-                    "MESSAGE",
-                    "REASON"
-                ])
-
-                for record in invalid_records:
-
-                    writer.writerow([
-                        record.row_number,
-                        record.msisdn,
-                        record.message,
-                        record.reason
-                    ])
-
-            self.logger.info(
-                "Invalid record file created: %s",
-                output_file
+            writer = csv.writer(
+                fp,
+                delimiter=self.delimiter
             )
 
-        except Exception as ex:
+            writer.writerow([
+                "LINE_NUMBER",
+                "MSISDN",
+                "MESSAGE",
+                "ERROR"
+            ])
 
-            self.logger.exception(
-                "Failed writing invalid record file: %s",
-                ex
+            writer.writerows(rows)
+
+        self.logger.info(
+            "Invalid records written to %s",
+            output
+        )    # =====================================================================
+    # Verify Input File
+    # =====================================================================
+
+    def verify(self, input_file):
+
+        file_path = Path(input_file)
+
+        if not file_path.exists():
+            raise FileNotFoundError(
+                f"Input file not found: {input_file}"
             )
 
-            raise
+        if not file_path.is_file():
+            raise ValueError(
+                f"Not a valid file: {input_file}"
+            )
 
-    # =====================================================================
-    # File Validation
-    # =====================================================================
+        if file_path.stat().st_size == 0:
+            raise ValueError(
+                "Input file is empty."
+            )
 
-    def validate_file(self, input_file: str):
+        self.logger.info(
+            "Input file verified successfully."
+        )
 
-        try:
-
-            with open(
-                input_file,
-                "r",
-                encoding="utf-8"
-            ) as fp:
-
-                if fp.read(1) == "":
-
-                    raise ValueError(
-                        "Input CSV file is empty."
-                    )
-
-            return True
-
-        except Exception:
-
-            raise
+        return True
 
     # =====================================================================
     # Validation Summary
     # =====================================================================
 
-    def print_summary(self, result: ValidationResult):
+    def summary(self, result):
 
         self.logger.info("=" * 70)
         self.logger.info("Validation Summary")
         self.logger.info("=" * 70)
 
         self.logger.info(
-            "Total Records   : %d",
+            "Total Records : %d",
             result.total_records
         )
 
         self.logger.info(
-            "Valid Records   : %d",
+            "Valid Records : %d",
             result.valid_count
         )
 
@@ -505,123 +370,10 @@ class Validator:
 
         self.logger.info("=" * 70)
 
-    # =====================================================================
-    # Process Result
-    # =====================================================================
 
-    def finalize(
-        self,
-        result: ValidationResult
-    ) -> ValidationResult:
-
-        #
-        # Write invalid records
-        #
-
-        self.write_invalid_records(
-            result.invalid_records
-        )
-
-        #
-        # Statistics
-        #
-
-        statistics = self.calculate_statistics(
-            result.valid_records
-        )
-
-        self.log_statistics(
-            statistics
-        )
-
-        self.print_summary(
-            result
-        )
-
-        return result
-
-    # =====================================================================
-    # Validate And Finalize
-    # =====================================================================
-
-    def validate_input_file(
-        self,
-        input_file: str
-    ) -> ValidationResult:
-
-        self.validate_file(
-            input_file
-        )
-
-        result = self.validate(
-            input_file
-        )
-
-        return self.finalize(
-            result
-        )
-        # =====================================================================
-    # Validation Report
-    # =====================================================================
-
-    def generate_report(self, result: ValidationResult) -> dict:
-        """
-        Returns validation summary as dictionary.
-        """
-
-        return {
-            "success": result.success,
-            "total_records": result.total_records,
-            "valid_records": result.valid_count,
-            "invalid_records": result.invalid_count
-        }
-
-    # =====================================================================
-    # Print Invalid Records
-    # =====================================================================
-
-    def print_invalid_records(
-        self,
-        result: ValidationResult
-    ):
-
-        if not result.invalid_records:
-            return
-
-        self.logger.warning("=" * 70)
-        self.logger.warning("Invalid Records")
-        self.logger.warning("=" * 70)
-
-        for record in result.invalid_records:
-
-            self.logger.warning(
-                "Row=%d MSISDN=%s Reason=%s",
-                record.row_number,
-                record.msisdn,
-                record.reason
-            )
-
-        self.logger.warning("=" * 70)
-
-    # =====================================================================
-    # Validate Convenience Method
-    # =====================================================================
-
-    def process(self, input_file: str) -> ValidationResult:
-        """
-        Main entry point used by send_sms.py
-        """
-
-        result = self.validate_input_file(input_file)
-
-        self.print_invalid_records(result)
-
-        return result
-
-
-# =============================================================================
-# Standalone Execution
-# =============================================================================
+# ============================================================================
+# Standalone Test
+# ============================================================================
 
 if __name__ == "__main__":
 
@@ -643,14 +395,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--input",
         required=True,
-        help="Input CSV File"
+        help="Input CSV file"
     )
 
     args = parser.parse_args()
-
-    #
-    # Load Configuration
-    #
 
     config = ConfigLoader(
         args.config
@@ -665,27 +413,35 @@ if __name__ == "__main__":
 
     try:
 
-        result = validator.process(
-            args.input
+        validator.verify(args.input)
+
+        result = validator.process(args.input)
+
+        validator.summary(result)
+
+        if result.success:
+
+            logger.info(
+                "Validation completed successfully."
+            )
+
+            raise SystemExit(0)
+
+        logger.error(
+            "No valid records found."
         )
 
-        logger.info(
-            "Validation Status : %s",
-            "SUCCESS" if result.success else "FAILED"
-        )
-
-        logger.info(
-            "Valid Records Returned : %d",
-            len(result.valid_records)
-        )
-
-        raise SystemExit(0)
+        raise SystemExit(1)
 
     except Exception as ex:
 
         logger.exception(
-            "Validation failed : %s",
+            "Validation failed: %s",
             ex
         )
 
-        raise SystemExit(1)
+        raise SystemExit(2)
+
+    finally:
+
+        Logger.shutdown()

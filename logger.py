@@ -3,8 +3,7 @@
 ===============================================================================
 Module      : logger.py
 Description : Centralized Logging Utility
-Author       : Pelatro
-Version      : 1.0
+Version     : 1.1
 ===============================================================================
 """
 
@@ -14,28 +13,36 @@ from logging.handlers import RotatingFileHandler
 
 
 class Logger:
-    """
-    Singleton Logger
-    """
 
     _logger = None
 
     @staticmethod
     def get_logger(config):
-        """
-        Returns singleton logger instance.
-        """
 
         if Logger._logger is not None:
             return Logger._logger
 
-        log_cfg = config["logging"]
-        path_cfg = config["paths"]
+        #
+        # Read configuration safely
+        #
 
-        log_directory = path_cfg["log_directory"]
-        log_file = path_cfg["log_file"]
+        log_cfg = config.get("logging", {})
+        path_cfg = config.get("paths", {})
 
-        os.makedirs(log_directory, exist_ok=True)
+        log_directory = path_cfg.get(
+            "log_directory",
+            "./logs"
+        )
+
+        log_file = path_cfg.get(
+            "log_file",
+            "sms_sender.log"
+        )
+
+        os.makedirs(
+            log_directory,
+            exist_ok=True
+        )
 
         log_path = os.path.join(
             log_directory,
@@ -43,19 +50,10 @@ class Logger:
         )
 
         logger = logging.getLogger("SMS_SENDER")
-
         logger.propagate = False
-
-        #
-        # Remove duplicate handlers
-        #
 
         if logger.hasHandlers():
             logger.handlers.clear()
-
-        #
-        # Log Level
-        #
 
         level = log_cfg.get(
             "level",
@@ -70,12 +68,7 @@ class Logger:
             )
         )
 
-        #
-        # Formatter
-        #
-
         formatter = logging.Formatter(
-
             fmt=(
                 "%(asctime)s | "
                 "%(levelname)-8s | "
@@ -83,13 +76,11 @@ class Logger:
                 "%(filename)s:%(lineno)d | "
                 "%(message)s"
             ),
-
             datefmt="%Y-%m-%d %H:%M:%S"
-
         )
 
         #
-        # File Handler
+        # File logging
         #
 
         if log_cfg.get("file", True):
@@ -112,40 +103,27 @@ class Logger:
             )
 
             file_handler = RotatingFileHandler(
-
                 filename=log_path,
-
                 maxBytes=max_size,
-
                 backupCount=backup_count,
-
                 encoding="utf-8"
-
             )
 
-            file_handler.setFormatter(
-                formatter
-            )
+            file_handler.setFormatter(formatter)
 
-            logger.addHandler(
-                file_handler
-            )
+            logger.addHandler(file_handler)
 
         #
-        # Console Handler
+        # Console logging
         #
 
         if log_cfg.get("console", True):
 
             console_handler = logging.StreamHandler()
 
-            console_handler.setFormatter(
-                formatter
-            )
+            console_handler.setFormatter(formatter)
 
-            logger.addHandler(
-                console_handler
-            )
+            logger.addHandler(console_handler)
 
         Logger._logger = logger
 
@@ -159,9 +137,6 @@ class Logger:
 
     @staticmethod
     def shutdown():
-        """
-        Gracefully shutdown logging.
-        """
 
         if Logger._logger:
 
