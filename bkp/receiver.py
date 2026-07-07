@@ -3,7 +3,7 @@
 ===============================================================================
 Module      : receiver.py
 Description : SMPP Delivery Report Receiver
-Version     : 1.1
+Version     : 1.0
 ===============================================================================
 """
 
@@ -16,6 +16,7 @@ from dlr_parser import DLRParser
 class Receiver:
     """
     Background receiver responsible for:
+
     - Reading deliver_sm PDUs
     - Parsing delivery reports
     - Correlating Message IDs
@@ -80,23 +81,10 @@ class Receiver:
 
             try:
 
-                #
-                # Wait until SMPP session is available
-                #
-                if (
-                    self.smpp_client.client is None or
-                    not self.smpp_client.status.connected or
-                    not self.smpp_client.status.bound
-                ):
-                    time.sleep(1)
-                    continue
-
                 pdu = self.smpp_client.read_pdu()
 
-                #
-                # Nothing received
-                #
                 if pdu is None:
+
                     time.sleep(0.2)
                     continue
 
@@ -114,32 +102,30 @@ class Receiver:
         self.logger.info(
             "Receiver thread stopped."
         )
-            # =====================================================================
+
+    # =====================================================================
     # Process PDU
     # =====================================================================
 
     def _process_pdu(self, pdu):
 
-        command = getattr(
-            pdu,
-            "command",
-            None
-        )
-
         #
         # Ignore non-deliver_sm PDUs
         #
-        if command != "deliver_sm":
+
+        if not hasattr(pdu, "command"):
+
+            return
+
+        if str(pdu.command) != "deliver_sm":
+
             return
 
         report = self.parser.parse(pdu)
 
-        if report is None:
-            return
-
         self._process_delivery_report(report)
-
-    # =====================================================================
+    
+        # =====================================================================
     # Process Delivery Report
     # =====================================================================
 
@@ -161,19 +147,20 @@ class Receiver:
         #
         # Populate MSISDN from sender mapping
         #
+
         report.msisdn = correlation.msisdn
 
         #
         # Write Delivery Report
         #
+
         self.cdr_writer.write(report)
 
         #
         # Update sender statistics
         #
-        delivered = (
-            report.status.upper() == "DELIVRD"
-        )
+
+        delivered = report.status.upper() == "DELIVRD"
 
         self.sender.update_delivery_statistics(
             delivered
@@ -182,6 +169,7 @@ class Receiver:
         #
         # Remove processed correlation
         #
+
         self.sender.remove_correlation(
             report.message_id
         )
@@ -209,13 +197,9 @@ class Receiver:
     def statistics(self):
 
         return {
-
             "pending_messages": self.pending(),
-
-            "thread_alive":
-                self.thread.is_alive()
-                if self.thread else False
-
+            "thread_alive": self.thread.is_alive()
+            if self.thread else False
         }
 
     # =====================================================================
@@ -225,17 +209,15 @@ class Receiver:
     def health(self):
 
         return {
-
             "receiver_running":
                 self.thread.is_alive()
                 if self.thread else False,
 
             "pending_messages":
                 self.pending()
-
         }
-            # =====================================================================
-    # Wait for Pending Delivery Reports
+        # =====================================================================
+    # Wait for Pending DLRs
     # =====================================================================
 
     def wait_for_pending(
@@ -244,7 +226,7 @@ class Receiver:
     ):
         """
         Wait until all pending message correlations have been
-        processed or until timeout expires.
+        processed or the timeout expires.
         """
 
         start = time.time()
@@ -284,6 +266,7 @@ class Receiver:
     def join(self, timeout=None):
 
         if self.thread:
+
             self.thread.join(timeout)
 
     # =====================================================================
@@ -317,6 +300,9 @@ class Receiver:
     # =====================================================================
 
     def shutdown(self):
+        """
+        Gracefully stop the receiver thread.
+        """
 
         self.logger.info(
             "Stopping receiver..."
@@ -341,9 +327,7 @@ class Receiver:
         self.logger.info(
             "Receiver reset completed."
         )
-
-
-# =============================================================================
+    # =============================================================================
 # Standalone Execution
 # =============================================================================
 
@@ -369,6 +353,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    #
+    # Load configuration
+    #
+
     config = ConfigLoader(
         args.config
     ).load()
@@ -387,6 +375,10 @@ if __name__ == "__main__":
         )
 
         raise SystemExit(1)
+
+    #
+    # Start enquire link thread
+    #
 
     client.start_enquire_link_thread()
 
@@ -442,5 +434,7 @@ if __name__ == "__main__":
     finally:
 
         receiver.shutdown()
+
         client.shutdown()
+
         Logger.shutdown()

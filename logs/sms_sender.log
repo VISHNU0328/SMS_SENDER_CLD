@@ -675,3 +675,403 @@ RuntimeError: No valid SMS records found.
 2026-07-07 07:14:55 | INFO     | MainThread      | receiver.py:307 | Stopping receiver...
 2026-07-07 07:14:55 | INFO     | ReceiverThread  | smpp_client.py:154 | Successfully bound as transceiver.
 2026-07-07 07:14:55 | INFO     | ReceiverThread  | smpp_client.py:390 | SMPP reconnection successful.
+2026-07-07 07:26:57 | INFO     | MainThread      | logger.py:130 | ================================================================================
+2026-07-07 07:26:57 | INFO     | MainThread      | logger.py:131 | Logger Initialized
+2026-07-07 07:26:57 | INFO     | MainThread      | logger.py:132 | Log File : ./logs/sms_sender.log
+2026-07-07 07:26:57 | INFO     | MainThread      | logger.py:133 | Log Level: INFO
+2026-07-07 07:26:57 | INFO     | MainThread      | logger.py:134 | ================================================================================
+2026-07-07 07:26:57 | INFO     | MainThread      | utils.py:389 | ================================================================================
+2026-07-07 07:26:57 | INFO     | MainThread      | utils.py:390 | Application : SMS Sender
+2026-07-07 07:26:57 | INFO     | MainThread      | utils.py:391 | Version     : 1.0.0
+2026-07-07 07:26:57 | INFO     | MainThread      | utils.py:392 | Environment : UAT
+2026-07-07 07:26:57 | INFO     | MainThread      | utils.py:393 | Hostname    : DESKTOP-C8O04O9
+2026-07-07 07:26:57 | INFO     | MainThread      | utils.py:394 | Process ID  : 31676
+2026-07-07 07:26:57 | INFO     | MainThread      | utils.py:395 | Start Time  : 2026-07-07 07:26:57
+2026-07-07 07:26:57 | INFO     | MainThread      | utils.py:396 | ================================================================================
+2026-07-07 07:26:57 | INFO     | MainThread      | send_sms.py:254 | Input File : input/sms_input.csv
+2026-07-07 07:26:57 | INFO     | MainThread      | send_sms.py:129 | Initializing SMPP session...
+2026-07-07 07:26:57 | INFO     | MainThread      | smpp_client.py:97 | Connecting to localhost:2775
+2026-07-07 07:26:57 | INFO     | MainThread      | smpp_client.py:112 | TCP connection established.
+2026-07-07 07:26:57 | INFO     | MainThread      | smpp_client.py:154 | Successfully bound as transceiver.
+2026-07-07 07:26:57 | WARNING  | EnquireLinkThread | smpp_client.py:322 | enquire_link failed: 'Client' object has no attribute 'enquire_link'
+2026-07-07 07:26:57 | INFO     | MainThread      | smpp_client.py:514 | Enquire Link thread started.
+2026-07-07 07:26:57 | INFO     | ReceiverThread  | receiver.py:76 | Waiting for Delivery Reports...
+2026-07-07 07:26:57 | INFO     | MainThread      | receiver.py:66 | Receiver thread started.
+2026-07-07 07:26:57 | WARNING  | ReceiverThread  | smpp_client.py:345 | SMPP session unavailable. Attempting reconnect...
+2026-07-07 07:26:57 | INFO     | MainThread      | send_sms.py:143 | Initialization completed.
+2026-07-07 07:26:57 | INFO     | MainThread      | send_sms.py:156 | Validating input file: input/sms_input.csv
+2026-07-07 07:26:57 | INFO     | ReceiverThread  | smpp_client.py:376 | Reconnect attempt 1
+2026-07-07 07:26:57 | INFO     | MainThread      | validator.py:73 | Processing input file: input/sms_input.csv
+2026-07-07 07:26:57 | INFO     | MainThread      | validator.py:78 | Delimiter : ','
+2026-07-07 07:26:57 | INFO     | ReceiverThread  | smpp_client.py:441 | Disconnected from SMSC.
+2026-07-07 07:26:57 | INFO     | MainThread      | validator.py:167 | Validation complete. Valid=2 Invalid=0
+2026-07-07 07:26:57 | INFO     | ReceiverThread  | smpp_client.py:97 | Connecting to localhost:2775
+2026-07-07 07:26:57 | INFO     | MainThread      | send_sms.py:181 | Starting SMS submission...
+2026-07-07 07:26:57 | INFO     | MainThread      | sender.py:82 | Starting SMS submission. Total records=2
+2026-07-07 07:26:57 | INFO     | ReceiverThread  | smpp_client.py:112 | TCP connection established.
+2026-07-07 07:26:57 | WARNING  | MainThread      | smpp_client.py:345 | SMPP session unavailable. Attempting reconnect...
+2026-07-07 07:26:57 | INFO     | MainThread      | smpp_client.py:376 | Reconnect attempt 1
+2026-07-07 07:26:57 | INFO     | MainThread      | smpp_client.py:441 | Disconnected from SMSC.
+2026-07-07 07:26:57 | INFO     | MainThread      | smpp_client.py:97 | Connecting to localhost:2775
+2026-07-07 07:26:57 | ERROR    | ReceiverThread  | smpp_client.py:164 | Bind failed: 'NoneType' object has no attribute 'recv'
+Traceback (most recent call last):
+  File "/home/vishnu/SEND_SMS_TEST/smpp_client.py", line 142, in bind
+    self.client.bind_transceiver(
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 187, in bind_transceiver
+    return self._bind('bind_transceiver', **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 165, in _bind
+    resp = self.read_pdu()
+           ^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 246, in read_pdu
+    raw_len = self._recv_exact(4)
+              ^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 229, in _recv_exact
+    part = self._socket.recv(exact_size - received)
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'recv'
+2026-07-07 07:26:57 | INFO     | MainThread      | smpp_client.py:112 | TCP connection established.
+2026-07-07 07:26:57 | WARNING  | ReceiverThread  | smpp_client.py:396 | Reconnect failed. Waiting 10 seconds...
+2026-07-07 07:26:57 | INFO     | MainThread      | smpp_client.py:154 | Successfully bound as transceiver.
+2026-07-07 07:26:57 | INFO     | MainThread      | smpp_client.py:390 | SMPP reconnection successful.
+2026-07-07 07:26:57 | ERROR    | MainThread      | smpp_client.py:257 | SMS submission failed for 255712345678 : can't concat str to bytes
+Traceback (most recent call last):
+  File "/home/vishnu/SEND_SMS_TEST/smpp_client.py", line 213, in submit_sm
+    response = self.client.send_message(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 408, in send_message
+    self.send_pdu(ssm)
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 210, in send_pdu
+    generated = p.generate()
+                ^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/pdu.py", line 132, in generate
+    body = self.generate_params()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/command.py", line 146, in generate_params
+    body += value
+TypeError: can't concat str to bytes
+2026-07-07 07:26:57 | WARNING  | MainThread      | sender.py:128 | Submission failed for 255712345678 (Attempt 1/4): can't concat str to bytes
+2026-07-07 07:27:02 | ERROR    | MainThread      | smpp_client.py:257 | SMS submission failed for 255712345678 : can't concat str to bytes
+Traceback (most recent call last):
+  File "/home/vishnu/SEND_SMS_TEST/smpp_client.py", line 213, in submit_sm
+    response = self.client.send_message(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 408, in send_message
+    self.send_pdu(ssm)
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 210, in send_pdu
+    generated = p.generate()
+                ^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/pdu.py", line 132, in generate
+    body = self.generate_params()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/command.py", line 146, in generate_params
+    body += value
+TypeError: can't concat str to bytes
+2026-07-07 07:27:02 | WARNING  | MainThread      | sender.py:128 | Submission failed for 255712345678 (Attempt 2/4): can't concat str to bytes
+2026-07-07 07:27:07 | INFO     | ReceiverThread  | smpp_client.py:376 | Reconnect attempt 2
+2026-07-07 07:27:07 | INFO     | ReceiverThread  | smpp_client.py:441 | Disconnected from SMSC.
+2026-07-07 07:27:07 | INFO     | ReceiverThread  | smpp_client.py:97 | Connecting to localhost:2775
+2026-07-07 07:27:07 | INFO     | ReceiverThread  | smpp_client.py:112 | TCP connection established.
+2026-07-07 07:27:07 | WARNING  | MainThread      | smpp_client.py:345 | SMPP session unavailable. Attempting reconnect...
+2026-07-07 07:27:07 | INFO     | MainThread      | smpp_client.py:376 | Reconnect attempt 1
+2026-07-07 07:27:07 | INFO     | MainThread      | smpp_client.py:441 | Disconnected from SMSC.
+2026-07-07 07:27:07 | INFO     | MainThread      | smpp_client.py:97 | Connecting to localhost:2775
+2026-07-07 07:27:07 | INFO     | MainThread      | smpp_client.py:112 | TCP connection established.
+2026-07-07 07:27:07 | INFO     | MainThread      | smpp_client.py:154 | Successfully bound as transceiver.
+2026-07-07 07:27:07 | INFO     | MainThread      | smpp_client.py:390 | SMPP reconnection successful.
+2026-07-07 07:27:07 | ERROR    | MainThread      | smpp_client.py:257 | SMS submission failed for 255712345678 : can't concat str to bytes
+Traceback (most recent call last):
+  File "/home/vishnu/SEND_SMS_TEST/smpp_client.py", line 213, in submit_sm
+    response = self.client.send_message(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 408, in send_message
+    self.send_pdu(ssm)
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 210, in send_pdu
+    generated = p.generate()
+                ^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/pdu.py", line 132, in generate
+    body = self.generate_params()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/command.py", line 146, in generate_params
+    body += value
+TypeError: can't concat str to bytes
+2026-07-07 07:27:07 | WARNING  | MainThread      | sender.py:128 | Submission failed for 255712345678 (Attempt 3/4): can't concat str to bytes
+2026-07-07 07:27:12 | ERROR    | MainThread      | smpp_client.py:257 | SMS submission failed for 255712345678 : can't concat str to bytes
+Traceback (most recent call last):
+  File "/home/vishnu/SEND_SMS_TEST/smpp_client.py", line 213, in submit_sm
+    response = self.client.send_message(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 408, in send_message
+    self.send_pdu(ssm)
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 210, in send_pdu
+    generated = p.generate()
+                ^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/pdu.py", line 132, in generate
+    body = self.generate_params()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/command.py", line 146, in generate_params
+    body += value
+TypeError: can't concat str to bytes
+2026-07-07 07:27:12 | ERROR    | ReceiverThread  | smpp_client.py:164 | Bind failed: 
+Traceback (most recent call last):
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 165, in _bind
+    resp = self.read_pdu()
+           ^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 246, in read_pdu
+    raw_len = self._recv_exact(4)
+              ^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 229, in _recv_exact
+    part = self._socket.recv(exact_size - received)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/vishnu/SEND_SMS_TEST/smpp_client.py", line 142, in bind
+    self.client.bind_transceiver(
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 187, in bind_transceiver
+    return self._bind('bind_transceiver', **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 167, in _bind
+    raise exceptions.ConnectionError()
+smpplib.exceptions.ConnectionError
+2026-07-07 07:27:12 | WARNING  | MainThread      | sender.py:128 | Submission failed for 255712345678 (Attempt 4/4): can't concat str to bytes
+2026-07-07 07:27:12 | WARNING  | ReceiverThread  | smpp_client.py:396 | Reconnect failed. Waiting 10 seconds...
+2026-07-07 07:27:12 | ERROR    | MainThread      | sender.py:155 | SMS permanently failed for 255712345678
+2026-07-07 07:27:12 | WARNING  | MainThread      | smpp_client.py:345 | SMPP session unavailable. Attempting reconnect...
+2026-07-07 07:27:12 | INFO     | MainThread      | smpp_client.py:376 | Reconnect attempt 1
+2026-07-07 07:27:12 | INFO     | MainThread      | smpp_client.py:441 | Disconnected from SMSC.
+2026-07-07 07:27:12 | INFO     | MainThread      | smpp_client.py:97 | Connecting to localhost:2775
+2026-07-07 07:27:12 | INFO     | MainThread      | smpp_client.py:112 | TCP connection established.
+2026-07-07 07:27:12 | INFO     | MainThread      | smpp_client.py:154 | Successfully bound as transceiver.
+2026-07-07 07:27:12 | INFO     | MainThread      | smpp_client.py:390 | SMPP reconnection successful.
+2026-07-07 07:27:12 | ERROR    | MainThread      | smpp_client.py:257 | SMS submission failed for 255712345679 : can't concat str to bytes
+Traceback (most recent call last):
+  File "/home/vishnu/SEND_SMS_TEST/smpp_client.py", line 213, in submit_sm
+    response = self.client.send_message(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 408, in send_message
+    self.send_pdu(ssm)
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 210, in send_pdu
+    generated = p.generate()
+                ^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/pdu.py", line 132, in generate
+    body = self.generate_params()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/command.py", line 146, in generate_params
+    body += value
+TypeError: can't concat str to bytes
+2026-07-07 07:27:12 | WARNING  | MainThread      | sender.py:128 | Submission failed for 255712345679 (Attempt 1/4): can't concat str to bytes
+2026-07-07 07:27:17 | ERROR    | MainThread      | smpp_client.py:257 | SMS submission failed for 255712345679 : can't concat str to bytes
+Traceback (most recent call last):
+  File "/home/vishnu/SEND_SMS_TEST/smpp_client.py", line 213, in submit_sm
+    response = self.client.send_message(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 408, in send_message
+    self.send_pdu(ssm)
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 210, in send_pdu
+    generated = p.generate()
+                ^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/pdu.py", line 132, in generate
+    body = self.generate_params()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/command.py", line 146, in generate_params
+    body += value
+TypeError: can't concat str to bytes
+2026-07-07 07:27:17 | WARNING  | MainThread      | sender.py:128 | Submission failed for 255712345679 (Attempt 2/4): can't concat str to bytes
+2026-07-07 07:27:17 | INFO     | MainThread      | archive.py:112 | Moved file to failed directory : failed/20260707_072717_DESKTOP-C8O04O9_31676_sms_input.csv
+2026-07-07 07:27:17 | INFO     | MainThread      | send_sms.py:342 | Starting application shutdown...
+2026-07-07 07:27:17 | INFO     | MainThread      | receiver.py:307 | Stopping receiver...
+2026-07-07 07:43:13 | INFO     | MainThread      | logger.py:130 | ================================================================================
+2026-07-07 07:43:13 | INFO     | MainThread      | logger.py:131 | Logger Initialized
+2026-07-07 07:43:13 | INFO     | MainThread      | logger.py:132 | Log File : ./logs/sms_sender.log
+2026-07-07 07:43:13 | INFO     | MainThread      | logger.py:133 | Log Level: INFO
+2026-07-07 07:43:13 | INFO     | MainThread      | logger.py:134 | ================================================================================
+2026-07-07 07:43:13 | INFO     | MainThread      | utils.py:389 | ================================================================================
+2026-07-07 07:43:13 | INFO     | MainThread      | utils.py:390 | Application : SMS Sender
+2026-07-07 07:43:13 | INFO     | MainThread      | utils.py:391 | Version     : 1.0.0
+2026-07-07 07:43:13 | INFO     | MainThread      | utils.py:392 | Environment : UAT
+2026-07-07 07:43:13 | INFO     | MainThread      | utils.py:393 | Hostname    : DESKTOP-C8O04O9
+2026-07-07 07:43:13 | INFO     | MainThread      | utils.py:394 | Process ID  : 33362
+2026-07-07 07:43:13 | INFO     | MainThread      | utils.py:395 | Start Time  : 2026-07-07 07:43:13
+2026-07-07 07:43:13 | INFO     | MainThread      | utils.py:396 | ================================================================================
+2026-07-07 07:43:13 | INFO     | MainThread      | send_sms.py:254 | Input File : input/sms_input.csv
+2026-07-07 07:43:13 | INFO     | MainThread      | send_sms.py:129 | Initializing SMPP session...
+2026-07-07 07:43:13 | INFO     | MainThread      | smpp_client.py:85 | Connecting to localhost:2775
+2026-07-07 07:43:13 | INFO     | MainThread      | smpp_client.py:107 | TCP connection established.
+2026-07-07 07:43:13 | INFO     | MainThread      | smpp_client.py:149 | Successfully bound as transceiver.
+2026-07-07 07:43:13 | INFO     | MainThread      | smpp_client.py:535 | Enquire Link thread started.
+2026-07-07 07:43:13 | INFO     | ReceiverThread  | receiver.py:75 | Waiting for Delivery Reports...
+2026-07-07 07:43:13 | INFO     | MainThread      | receiver.py:65 | Receiver thread started.
+2026-07-07 07:43:13 | INFO     | MainThread      | send_sms.py:143 | Initialization completed.
+2026-07-07 07:43:13 | INFO     | MainThread      | send_sms.py:156 | Validating input file: input/sms_input.csv
+2026-07-07 07:43:13 | INFO     | MainThread      | validator.py:73 | Processing input file: input/sms_input.csv
+2026-07-07 07:43:13 | INFO     | MainThread      | validator.py:78 | Delimiter : ','
+2026-07-07 07:43:13 | INFO     | MainThread      | validator.py:314 | Invalid records written to failed/invalid_records.csv
+2026-07-07 07:43:13 | INFO     | MainThread      | validator.py:167 | Validation complete. Valid=0 Invalid=1
+2026-07-07 07:43:13 | ERROR    | MainThread      | send_sms.py:316 | Application failed: No valid SMS records found.
+Traceback (most recent call last):
+  File "/home/vishnu/SEND_SMS_TEST/send_sms.py", line 269, in run
+    validation_result = self.validate_input(
+                        ^^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/send_sms.py", line 167, in validate_input
+    raise RuntimeError(
+RuntimeError: No valid SMS records found.
+2026-07-07 07:43:13 | INFO     | MainThread      | archive.py:112 | Moved file to failed directory : failed/20260707_074313_DESKTOP-C8O04O9_33362_sms_input.csv
+2026-07-07 07:43:13 | INFO     | MainThread      | send_sms.py:342 | Starting application shutdown...
+2026-07-07 07:43:13 | INFO     | MainThread      | receiver.py:321 | Stopping receiver...
+2026-07-07 07:43:18 | INFO     | MainThread      | receiver.py:329 | Receiver shutdown complete.
+2026-07-07 07:43:18 | INFO     | MainThread      | sender.py:367 | Message mapping saved: ./data/message_mapping.csv
+2026-07-07 07:43:18 | INFO     | MainThread      | sender.py:472 | Sender shutdown complete.
+2026-07-07 07:43:18 | INFO     | MainThread      | smpp_client.py:609 | Shutting down SMPP client...
+2026-07-07 07:43:18 | INFO     | EnquireLinkThread | smpp_client.py:567 | Enquire Link thread stopped.
+2026-07-07 07:43:18 | INFO     | MainThread      | smpp_client.py:471 | Disconnected from SMSC.
+2026-07-07 07:43:18 | INFO     | MainThread      | smpp_client.py:623 | SMPP client shutdown complete.
+2026-07-07 07:45:01 | INFO     | MainThread      | logger.py:130 | ================================================================================
+2026-07-07 07:45:01 | INFO     | MainThread      | logger.py:131 | Logger Initialized
+2026-07-07 07:45:01 | INFO     | MainThread      | logger.py:132 | Log File : ./logs/sms_sender.log
+2026-07-07 07:45:01 | INFO     | MainThread      | logger.py:133 | Log Level: INFO
+2026-07-07 07:45:01 | INFO     | MainThread      | logger.py:134 | ================================================================================
+2026-07-07 07:45:01 | INFO     | MainThread      | utils.py:389 | ================================================================================
+2026-07-07 07:45:01 | INFO     | MainThread      | utils.py:390 | Application : SMS Sender
+2026-07-07 07:45:01 | INFO     | MainThread      | utils.py:391 | Version     : 1.0.0
+2026-07-07 07:45:01 | INFO     | MainThread      | utils.py:392 | Environment : UAT
+2026-07-07 07:45:01 | INFO     | MainThread      | utils.py:393 | Hostname    : DESKTOP-C8O04O9
+2026-07-07 07:45:01 | INFO     | MainThread      | utils.py:394 | Process ID  : 33573
+2026-07-07 07:45:01 | INFO     | MainThread      | utils.py:395 | Start Time  : 2026-07-07 07:45:01
+2026-07-07 07:45:01 | INFO     | MainThread      | utils.py:396 | ================================================================================
+2026-07-07 07:45:01 | INFO     | MainThread      | send_sms.py:254 | Input File : input/sms_input.csv
+2026-07-07 07:45:01 | INFO     | MainThread      | send_sms.py:129 | Initializing SMPP session...
+2026-07-07 07:45:01 | INFO     | MainThread      | smpp_client.py:85 | Connecting to localhost:2775
+2026-07-07 07:45:01 | INFO     | MainThread      | smpp_client.py:107 | TCP connection established.
+2026-07-07 07:45:01 | INFO     | MainThread      | smpp_client.py:149 | Successfully bound as transceiver.
+2026-07-07 07:45:01 | INFO     | MainThread      | smpp_client.py:535 | Enquire Link thread started.
+2026-07-07 07:45:01 | INFO     | ReceiverThread  | receiver.py:75 | Waiting for Delivery Reports...
+2026-07-07 07:45:01 | INFO     | MainThread      | receiver.py:65 | Receiver thread started.
+2026-07-07 07:45:01 | INFO     | MainThread      | send_sms.py:143 | Initialization completed.
+2026-07-07 07:45:01 | INFO     | MainThread      | send_sms.py:156 | Validating input file: input/sms_input.csv
+2026-07-07 07:45:01 | INFO     | MainThread      | validator.py:73 | Processing input file: input/sms_input.csv
+2026-07-07 07:45:01 | INFO     | MainThread      | validator.py:78 | Delimiter : ','
+2026-07-07 07:45:01 | INFO     | MainThread      | validator.py:167 | Validation complete. Valid=2 Invalid=0
+2026-07-07 07:45:01 | INFO     | MainThread      | send_sms.py:181 | Starting SMS submission...
+2026-07-07 07:45:01 | INFO     | MainThread      | sender.py:72 | Starting SMS submission. Total records=2
+2026-07-07 07:45:01 | INFO     | MainThread      | smpp_client.py:245 | SMS submitted successfully. MSISDN=1234567890 MessageID=
+2026-07-07 07:45:01 | INFO     | MainThread      | sender.py:183 | Submitted SMS: MessageID= MSISDN=1234567890 Parts=1
+2026-07-07 07:45:01 | INFO     | MainThread      | smpp_client.py:245 | SMS submitted successfully. MSISDN=7560925458 MessageID=
+2026-07-07 07:45:01 | INFO     | MainThread      | sender.py:183 | Submitted SMS: MessageID= MSISDN=7560925458 Parts=1
+2026-07-07 07:45:01 | INFO     | MainThread      | sender.py:90 | SMS submission completed.
+2026-07-07 07:45:01 | INFO     | MainThread      | send_sms.py:189 | SMS submission completed.
+2026-07-07 07:45:01 | INFO     | MainThread      | send_sms.py:213 | Waiting up to 300 seconds for Delivery Reports...
+2026-07-07 07:45:06 | ERROR    | ReceiverThread  | smpp_client.py:294 | Failed to read PDU: Unknown SMPP command code "0x1403"
+Traceback (most recent call last):
+  File "/home/vishnu/SEND_SMS_TEST/smpp_client.py", line 285, in read_pdu
+    return self.client.read_once()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 348, in read_once
+    pdu = self.read_pdu()
+          ^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/client.py", line 258, in read_pdu
+    pdu = smpp.parse_pdu(
+          ^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/smpp.py", line 41, in parse_pdu
+    new_pdu.parse(data)
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/pdu.py", line 127, in parse
+    self.parse_params(data[16:])
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/command.py", line 315, in parse_params
+    self.parse_optional_params(data[pos:])
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/command.py", line 333, in parse_optional_params
+    field = get_optional_name(type_code)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vishnu/SEND_SMS_TEST/venv/lib/python3.12/site-packages/smpplib/command.py", line 71, in get_optional_name
+    raise exceptions.UnknownCommandError('Unknown SMPP command code "0x%x"' % code)
+smpplib.exceptions.UnknownCommandError: Unknown SMPP command code "0x1403"
+2026-07-07 07:47:32 | INFO     | MainThread      | archive.py:112 | Moved file to failed directory : failed/20260707_074732_DESKTOP-C8O04O9_33573_sms_input.csv
+2026-07-07 07:47:32 | INFO     | MainThread      | send_sms.py:342 | Starting application shutdown...
+2026-07-07 07:47:32 | INFO     | MainThread      | receiver.py:321 | Stopping receiver...
+2026-07-07 07:47:33 | INFO     | ReceiverThread  | receiver.py:114 | Receiver thread stopped.
+2026-07-07 07:47:33 | INFO     | MainThread      | receiver.py:329 | Receiver shutdown complete.
+2026-07-07 07:47:33 | INFO     | MainThread      | sender.py:367 | Message mapping saved: ./data/message_mapping.csv
+2026-07-07 07:47:33 | INFO     | MainThread      | sender.py:472 | Sender shutdown complete.
+2026-07-07 07:47:33 | INFO     | MainThread      | smpp_client.py:609 | Shutting down SMPP client...
+2026-07-07 07:47:33 | INFO     | EnquireLinkThread | smpp_client.py:567 | Enquire Link thread stopped.
+2026-07-07 07:47:33 | INFO     | MainThread      | smpp_client.py:471 | Disconnected from SMSC.
+2026-07-07 07:47:33 | INFO     | MainThread      | smpp_client.py:623 | SMPP client shutdown complete.
+2026-07-07 08:06:19 | INFO     | MainThread      | logger.py:130 | ================================================================================
+2026-07-07 08:06:19 | INFO     | MainThread      | logger.py:131 | Logger Initialized
+2026-07-07 08:06:19 | INFO     | MainThread      | logger.py:132 | Log File : ./logs/sms_sender.log
+2026-07-07 08:06:19 | INFO     | MainThread      | logger.py:133 | Log Level: INFO
+2026-07-07 08:06:19 | INFO     | MainThread      | logger.py:134 | ================================================================================
+2026-07-07 08:06:19 | INFO     | MainThread      | utils.py:389 | ================================================================================
+2026-07-07 08:06:19 | INFO     | MainThread      | utils.py:390 | Application : SMS Sender
+2026-07-07 08:06:19 | INFO     | MainThread      | utils.py:391 | Version     : 1.0.0
+2026-07-07 08:06:19 | INFO     | MainThread      | utils.py:392 | Environment : UAT
+2026-07-07 08:06:19 | INFO     | MainThread      | utils.py:393 | Hostname    : DESKTOP-C8O04O9
+2026-07-07 08:06:19 | INFO     | MainThread      | utils.py:394 | Process ID  : 35804
+2026-07-07 08:06:19 | INFO     | MainThread      | utils.py:395 | Start Time  : 2026-07-07 08:06:19
+2026-07-07 08:06:19 | INFO     | MainThread      | utils.py:396 | ================================================================================
+2026-07-07 08:06:19 | INFO     | MainThread      | send_sms.py:254 | Input File : input/20260707_052157_DESKTOP-C8O04O9_10800_sms_input.csv
+2026-07-07 08:06:19 | INFO     | MainThread      | send_sms.py:129 | Initializing SMPP session...
+2026-07-07 08:06:19 | INFO     | MainThread      | smpp_client.py:85 | Connecting to localhost:2775
+2026-07-07 08:06:19 | INFO     | MainThread      | smpp_client.py:108 | TCP connection established.
+2026-07-07 08:06:19 | INFO     | MainThread      | smpp_client.py:150 | Successfully bound as transceiver.
+2026-07-07 08:06:19 | INFO     | MainThread      | smpp_client.py:536 | Enquire Link thread started.
+2026-07-07 08:06:19 | INFO     | ReceiverThread  | receiver.py:75 | Waiting for Delivery Reports...
+2026-07-07 08:06:19 | INFO     | MainThread      | receiver.py:65 | Receiver thread started.
+2026-07-07 08:06:19 | INFO     | MainThread      | send_sms.py:143 | Initialization completed.
+2026-07-07 08:06:19 | INFO     | MainThread      | send_sms.py:156 | Validating input file: input/20260707_052157_DESKTOP-C8O04O9_10800_sms_input.csv
+2026-07-07 08:06:19 | INFO     | MainThread      | validator.py:73 | Processing input file: input/20260707_052157_DESKTOP-C8O04O9_10800_sms_input.csv
+2026-07-07 08:06:19 | INFO     | MainThread      | validator.py:78 | Delimiter : ','
+2026-07-07 08:06:19 | INFO     | MainThread      | validator.py:167 | Validation complete. Valid=1 Invalid=0
+2026-07-07 08:06:19 | INFO     | MainThread      | send_sms.py:181 | Starting SMS submission...
+2026-07-07 08:06:19 | INFO     | MainThread      | sender.py:72 | Starting SMS submission. Total records=1
+2026-07-07 08:06:19 | INFO     | MainThread      | smpp_client.py:246 | SMS submitted successfully. MSISDN=255712345678 MessageID=
+2026-07-07 08:06:19 | INFO     | MainThread      | sender.py:183 | Submitted SMS: MessageID= MSISDN=255712345678 Parts=1
+2026-07-07 08:06:19 | INFO     | MainThread      | sender.py:90 | SMS submission completed.
+2026-07-07 08:06:19 | INFO     | MainThread      | send_sms.py:189 | SMS submission completed.
+2026-07-07 08:06:19 | INFO     | MainThread      | send_sms.py:213 | Waiting up to 300 seconds for Delivery Reports...
+2026-07-07 08:07:21 | INFO     | MainThread      | archive.py:112 | Moved file to failed directory : failed/20260707_080721_DESKTOP-C8O04O9_35804_20260707_052157_DESKTOP-C8O04O9_10800_sms_input.csv
+2026-07-07 08:07:21 | INFO     | MainThread      | send_sms.py:342 | Starting application shutdown...
+2026-07-07 08:07:21 | INFO     | MainThread      | receiver.py:321 | Stopping receiver...
+2026-07-07 08:08:46 | INFO     | MainThread      | logger.py:130 | ================================================================================
+2026-07-07 08:08:46 | INFO     | MainThread      | logger.py:131 | Logger Initialized
+2026-07-07 08:08:46 | INFO     | MainThread      | logger.py:132 | Log File : ./logs/sms_sender.log
+2026-07-07 08:08:46 | INFO     | MainThread      | logger.py:133 | Log Level: INFO
+2026-07-07 08:08:46 | INFO     | MainThread      | logger.py:134 | ================================================================================
+2026-07-07 08:08:46 | INFO     | MainThread      | utils.py:389 | ================================================================================
+2026-07-07 08:08:46 | INFO     | MainThread      | utils.py:390 | Application : SMS Sender
+2026-07-07 08:08:46 | INFO     | MainThread      | utils.py:391 | Version     : 1.0.0
+2026-07-07 08:08:46 | INFO     | MainThread      | utils.py:392 | Environment : UAT
+2026-07-07 08:08:46 | INFO     | MainThread      | utils.py:393 | Hostname    : DESKTOP-C8O04O9
+2026-07-07 08:08:46 | INFO     | MainThread      | utils.py:394 | Process ID  : 36080
+2026-07-07 08:08:46 | INFO     | MainThread      | utils.py:395 | Start Time  : 2026-07-07 08:08:46
+2026-07-07 08:08:46 | INFO     | MainThread      | utils.py:396 | ================================================================================
+2026-07-07 08:08:46 | INFO     | MainThread      | send_sms.py:254 | Input File : input/20260707_074732_DESKTOP-C8O04O9_33573_sms_input.csv
+2026-07-07 08:08:46 | INFO     | MainThread      | send_sms.py:129 | Initializing SMPP session...
+2026-07-07 08:08:46 | INFO     | MainThread      | smpp_client.py:85 | Connecting to localhost:2775
+2026-07-07 08:08:46 | INFO     | MainThread      | smpp_client.py:108 | TCP connection established.
+2026-07-07 08:08:46 | INFO     | MainThread      | smpp_client.py:150 | Successfully bound as transceiver.
+2026-07-07 08:08:46 | INFO     | MainThread      | smpp_client.py:538 | Enquire Link thread started.
+2026-07-07 08:08:46 | INFO     | ReceiverThread  | receiver.py:75 | Waiting for Delivery Reports...
+2026-07-07 08:08:46 | INFO     | MainThread      | receiver.py:65 | Receiver thread started.
+2026-07-07 08:08:46 | INFO     | MainThread      | send_sms.py:143 | Initialization completed.
+2026-07-07 08:08:46 | INFO     | MainThread      | send_sms.py:156 | Validating input file: input/20260707_074732_DESKTOP-C8O04O9_33573_sms_input.csv
+2026-07-07 08:08:46 | INFO     | MainThread      | validator.py:73 | Processing input file: input/20260707_074732_DESKTOP-C8O04O9_33573_sms_input.csv
+2026-07-07 08:08:46 | INFO     | MainThread      | validator.py:78 | Delimiter : ','
+2026-07-07 08:08:46 | INFO     | MainThread      | validator.py:167 | Validation complete. Valid=2 Invalid=0
+2026-07-07 08:08:46 | INFO     | MainThread      | send_sms.py:181 | Starting SMS submission...
+2026-07-07 08:08:46 | INFO     | MainThread      | sender.py:72 | Starting SMS submission. Total records=2
+2026-07-07 08:08:46 | INFO     | MainThread      | smpp_client.py:235 | Response Type: <class 'smpplib.command.SubmitSM'>
+2026-07-07 08:08:46 | INFO     | MainThread      | smpp_client.py:236 | Response Dict: {'_client': <smpplib.client.Client object at 0x7821305a50d0>, 'allow_unknown_opt_params': False, 'command': 'submit_sm', '_sequence': 3, 'status': 0, 'client': <smpplib.client.Client object at 0x7821305a50d0>, 'source_addr_ton': 5, 'source_addr_npi': 0, 'source_addr': '', 'dest_addr_ton': 1, 'dest_addr_npi': 1, 'destination_addr': '1234567890', 'short_message': b'Hello', 'data_coding': 0, 'registered_delivery': 1, 'service_type': None, 'esm_class': None, 'protocol_id': None, 'priority_flag': None, 'schedule_delivery_time': None, 'validity_period': None, 'replace_if_present_flag': None, 'sm_default_msg_id': None, 'user_message_reference': None, 'source_port': None, 'source_addr_subunit': None, 'destination_port': None, 'dest_addr_subunit': None, 'sar_msg_ref_num': None, 'sar_total_segments': None, 'sar_segment_seqnum': None, 'more_messages_to_send': None, 'payload_type': None, 'message_payload': None, 'privacy_indicator': None, 'callback_num': None, 'callback_num_pres_ind': None, 'source_subaddress': None, 'dest_subaddress': None, 'user_response_code': None, 'display_time': None, 'sms_signal': None, 'ms_validity': None, 'ms_msg_wait_facilities': None, 'number_of_messages': None, 'alert_on_message_delivery': None, 'language_indicator': None, 'its_reply_type': None, 'its_session_info': None, 'ussd_service_op': None, 'sm_length': 5, '_length': 48}
+2026-07-07 08:08:46 | INFO     | MainThread      | smpp_client.py:248 | SMS submitted successfully. MSISDN=1234567890 MessageID=
+2026-07-07 08:08:46 | INFO     | MainThread      | sender.py:183 | Submitted SMS: MessageID= MSISDN=1234567890 Parts=1
+2026-07-07 08:08:46 | INFO     | MainThread      | smpp_client.py:235 | Response Type: <class 'smpplib.command.SubmitSM'>
+2026-07-07 08:08:46 | INFO     | MainThread      | smpp_client.py:236 | Response Dict: {'_client': <smpplib.client.Client object at 0x7821305a50d0>, 'allow_unknown_opt_params': False, 'command': 'submit_sm', '_sequence': 4, 'status': 0, 'client': <smpplib.client.Client object at 0x7821305a50d0>, 'source_addr_ton': 5, 'source_addr_npi': 0, 'source_addr': '', 'dest_addr_ton': 1, 'dest_addr_npi': 1, 'destination_addr': '7560925458', 'short_message': b'Hey', 'data_coding': 0, 'registered_delivery': 1, 'service_type': None, 'esm_class': None, 'protocol_id': None, 'priority_flag': None, 'schedule_delivery_time': None, 'validity_period': None, 'replace_if_present_flag': None, 'sm_default_msg_id': None, 'user_message_reference': None, 'source_port': None, 'source_addr_subunit': None, 'destination_port': None, 'dest_addr_subunit': None, 'sar_msg_ref_num': None, 'sar_total_segments': None, 'sar_segment_seqnum': None, 'more_messages_to_send': None, 'payload_type': None, 'message_payload': None, 'privacy_indicator': None, 'callback_num': None, 'callback_num_pres_ind': None, 'source_subaddress': None, 'dest_subaddress': None, 'user_response_code': None, 'display_time': None, 'sms_signal': None, 'ms_validity': None, 'ms_msg_wait_facilities': None, 'number_of_messages': None, 'alert_on_message_delivery': None, 'language_indicator': None, 'its_reply_type': None, 'its_session_info': None, 'ussd_service_op': None, 'sm_length': 3, '_length': 46}
+2026-07-07 08:08:46 | INFO     | MainThread      | smpp_client.py:248 | SMS submitted successfully. MSISDN=7560925458 MessageID=
+2026-07-07 08:08:46 | INFO     | MainThread      | sender.py:183 | Submitted SMS: MessageID= MSISDN=7560925458 Parts=1
+2026-07-07 08:08:46 | INFO     | MainThread      | sender.py:90 | SMS submission completed.
+2026-07-07 08:08:46 | INFO     | MainThread      | send_sms.py:189 | SMS submission completed.
+2026-07-07 08:08:46 | INFO     | MainThread      | send_sms.py:213 | Waiting up to 300 seconds for Delivery Reports...
+2026-07-07 08:10:22 | INFO     | MainThread      | archive.py:112 | Moved file to failed directory : failed/20260707_081022_DESKTOP-C8O04O9_36080_20260707_074732_DESKTOP-C8O04O9_33573_sms_input.csv
+2026-07-07 08:10:22 | INFO     | MainThread      | send_sms.py:342 | Starting application shutdown...
+2026-07-07 08:10:22 | INFO     | MainThread      | receiver.py:321 | Stopping receiver...

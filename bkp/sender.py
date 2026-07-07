@@ -3,7 +3,7 @@
 ===============================================================================
 Module      : sender.py
 Description : SMS Sender Module
-Version     : 1.1
+Version     : 1.0
 ===============================================================================
 """
 
@@ -20,7 +20,20 @@ from models import (
 
 class Sender:
     """
-    Responsible for submitting validated SMS records.
+    Responsible for submitting validated SMS records to the SMPP client.
+
+    Responsibilities
+    ----------------
+    - Submit SMS
+    - Retry on failure
+    - Rate limiting
+    - Maintain MessageID correlation
+    - Update statistics
+
+    Does NOT:
+    - Parse DLRs
+    - Write CDRs
+    - Archive files
     """
 
     def __init__(self, config, logger, smpp_client):
@@ -51,10 +64,7 @@ class Sender:
         #
         # MessageID -> MessageCorrelation
         #
-        self.message_mapping: Dict[
-            str,
-            MessageCorrelation
-        ] = {}
+        self.message_mapping: Dict[str, MessageCorrelation] = {}
 
         self.lock = threading.Lock()
 
@@ -74,11 +84,7 @@ class Sender:
             len(records)
         )
 
-        delay = (
-            1.0 / self.rate_limit
-            if self.rate_limit > 0
-            else 0
-        )
+        delay = 1.0 / self.rate_limit if self.rate_limit > 0 else 0
 
         for record in records:
 
@@ -92,7 +98,8 @@ class Sender:
         )
 
         return self.statistics
-        # =====================================================================
+
+    # =====================================================================
     # Submit One Record
     # =====================================================================
 
@@ -101,7 +108,11 @@ class Sender:
         record: SMSRecord
     ):
 
-        for attempts in range(1, self.max_retry + 2):
+        attempts = 0
+
+        while attempts <= self.max_retry:
+
+            attempts += 1
 
             result = self.smpp_client.submit_sm(record)
 
@@ -124,20 +135,21 @@ class Sender:
 
             record.increment_retry()
 
-            if attempts < (self.max_retry + 1):
-                time.sleep(
-                    self.retry_interval
-                )
+            if attempts <= self.max_retry:
+
+                time.sleep(self.retry_interval)
 
         #
-        # Retries exhausted
+        # All retries exhausted
         #
+
         record.mark_failed(
             "SUBMIT_FAILED",
             "Maximum retry attempts exceeded"
         )
 
         with self.lock:
+
             self.statistics.failed_records += 1
 
         self.logger.error(
@@ -155,11 +167,6 @@ class Sender:
         message_id: str
     ):
 
-        #
-        # Ensure record is updated
-        #
-        record.mark_submitted(message_id)
-
         correlation = MessageCorrelation(
             message_id=message_id,
             msisdn=record.msisdn,
@@ -171,14 +178,10 @@ class Sender:
 
         with self.lock:
 
-            self.message_mapping[
-                message_id
-            ] = correlation
+            self.message_mapping[message_id] = correlation
 
             self.statistics.submitted_records += 1
-            self.statistics.total_sms_parts += (
-                record.sms_parts
-            )
+            self.statistics.total_sms_parts += record.sms_parts
 
         self.logger.info(
             "Submitted SMS: MessageID=%s MSISDN=%s Parts=%d",
@@ -186,8 +189,7 @@ class Sender:
             record.msisdn,
             record.sms_parts
         )
-
-    # =====================================================================
+        # =====================================================================
     # Message Correlation
     # =====================================================================
 
@@ -195,31 +197,36 @@ class Sender:
         self,
         message_id: str
     ):
+        """
+        Returns the MessageCorrelation object for a given SMPP Message ID.
+        """
 
         with self.lock:
-            return self.message_mapping.get(
-                message_id
-            )
+            return self.message_mapping.get(message_id)
 
     def get_all_correlations(self):
+        """
+        Returns a copy of the complete message mapping.
+        """
 
         with self.lock:
-            return dict(
-                self.message_mapping
-            )
+            return dict(self.message_mapping)
 
     def remove_correlation(
         self,
         message_id: str
     ):
+        """
+        Removes a correlation once the corresponding DLR
+        has been successfully processed.
+        """
 
         with self.lock:
 
-            self.message_mapping.pop(
-                message_id,
-                None
-            )
-                # =====================================================================
+            if message_id in self.message_mapping:
+                del self.message_mapping[message_id]
+
+    # =====================================================================
     # Statistics
     # =====================================================================
 
@@ -251,32 +258,22 @@ class Sender:
         self.logger.info("=" * 70)
         self.logger.info("SMS Submission Summary")
         self.logger.info("=" * 70)
-
         self.logger.info(
             "Total Records      : %d",
             stats.total_records
         )
-
         self.logger.info(
             "Submitted          : %d",
             stats.submitted_records
         )
-
-        self.logger.info(
-            "Delivered          : %d",
-            stats.delivered_records
-        )
-
         self.logger.info(
             "Failed             : %d",
             stats.failed_records
         )
-
         self.logger.info(
             "SMS Parts          : %d",
             stats.total_sms_parts
         )
-
         self.logger.info("=" * 70)
 
     # =====================================================================
@@ -289,7 +286,7 @@ class Sender:
             return len(self.message_mapping)
 
     # =====================================================================
-    # Lookup
+    # Lookup by Message ID
     # =====================================================================
 
     def lookup_msisdn(
@@ -314,19 +311,20 @@ class Sender:
             "Submission completed. Pending DLR mappings=%d",
             self.pending_messages()
         )
-
-    # =====================================================================
+        # =====================================================================
     # Message Mapping Persistence
     # =====================================================================
 
     def save_message_mapping(self):
+        """
+        Persist the current Message ID mapping to CSV so it can
+        be used by receiver.py for DLR correlation.
+        """
+
+        output_file = self.config["paths"]["message_mapping_file"]
 
         import csv
         from pathlib import Path
-
-        output_file = self.config["paths"][
-            "message_mapping_file"
-        ]
 
         Path(output_file).parent.mkdir(
             parents=True,
@@ -374,15 +372,17 @@ class Sender:
     # =====================================================================
 
     def load_message_mapping(self):
+        """
+        Reload previously saved mappings.
+        """
 
         import csv
         from pathlib import Path
 
-        mapping_file = self.config["paths"][
-            "message_mapping_file"
-        ]
+        mapping_file = self.config["paths"]["message_mapping_file"]
 
         if not Path(mapping_file).exists():
+
             return
 
         with self.lock:
@@ -424,6 +424,7 @@ class Sender:
     def clear_message_mapping(self):
 
         with self.lock:
+
             self.message_mapping.clear()
 
         self.logger.info(
@@ -441,13 +442,12 @@ class Sender:
             return {
                 "pending_messages": len(self.message_mapping),
                 "submitted": self.statistics.submitted_records,
-                "delivered": self.statistics.delivered_records,
                 "failed": self.statistics.failed_records,
                 "total_sms_parts": self.statistics.total_sms_parts
             }
 
     # =====================================================================
-    # Reset
+    # Reset Statistics
     # =====================================================================
 
     def reset(self):
@@ -455,6 +455,7 @@ class Sender:
         with self.lock:
 
             self.statistics = ApplicationStatistics()
+
             self.message_mapping.clear()
 
         self.logger.info(
@@ -472,3 +473,115 @@ class Sender:
         self.logger.info(
             "Sender shutdown complete."
         )
+    # =============================================================================
+# Standalone Execution
+# =============================================================================
+
+if __name__ == "__main__":
+
+    import argparse
+
+    from config_loader import ConfigLoader
+    from logger import Logger
+    from validator import Validator
+    from smpp_client import SMPPClient
+
+    parser = argparse.ArgumentParser(
+        description="SMS Sender"
+    )
+
+    parser.add_argument(
+        "--config",
+        required=True,
+        help="Configuration JSON"
+    )
+
+    parser.add_argument(
+        "--input",
+        required=True,
+        help="Input CSV file"
+    )
+
+    args = parser.parse_args()
+
+    #
+    # Load configuration
+    #
+
+    config = ConfigLoader(
+        args.config
+    ).load()
+
+    logger = Logger.get_logger(config)
+
+    validator = Validator(
+        config,
+        logger
+    )
+
+    validation_result = validator.process(
+        args.input
+    )
+
+    if not validation_result.success:
+
+        logger.error(
+            "No valid records found. Exiting."
+        )
+
+        raise SystemExit(1)
+
+    client = SMPPClient(
+        config=config,
+        logger=logger
+    )
+
+    if not client.start():
+
+        logger.error(
+            "Unable to establish SMPP session."
+        )
+
+        raise SystemExit(2)
+
+    client.start_enquire_link_thread()
+
+    sender = Sender(
+        config=config,
+        logger=logger,
+        smpp_client=client
+    )
+
+    try:
+
+        statistics = sender.send(
+            validation_result.valid_records
+        )
+
+        sender.print_summary()
+
+        logger.info(
+            "Submission completed successfully."
+        )
+
+        logger.info(
+            "Statistics: %s",
+            statistics
+        )
+
+    except Exception as ex:
+
+        logger.exception(
+            "Unexpected sender error: %s",
+            ex
+        )
+
+        raise SystemExit(3)
+
+    finally:
+
+        sender.shutdown()
+
+        client.shutdown()
+
+        Logger.shutdown()
