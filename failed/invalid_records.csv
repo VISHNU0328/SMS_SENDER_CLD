@@ -1,2 +1,3 @@
 LINE_NUMBER,MSISDN,MESSAGE,ERROR
-2,,,MSISDN is empty
+2,7012280715|Vishnu,,MSISDN must contain only digits
+3,7560925458,,Message is empty
